@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>使用Ajax取得文字資料</title>
+
+<!-- bootstrap 5.1.3 CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+	crossorigin="anonymous">
+
+<style type="text/css">
+.greeting {
+	font-size: 15px;
+	color: red;
+}
+
+img {
+	width: 100px;
+}
+</style>
+</head>
+
+<body>
+
+
+	<button id="getPlainTextBTN" class="btn btn-primary mx-3 my-3">取得純文字</button>
+	<button id="getJsonNoImgBTN" class="btn btn-primary mx-4 my-3">取得JSON(不要圖片)</button>
+	<button id="getJsonWithImgBTN" class="btn btn-primary">取得JSON(要圖片)</button>
+
+
+	<div class="mx-4">
+		<textarea class="form-control" placeholder="取得的資料(未加工)" id="dataHome"
+			style="height: 200px; width: 60%"></textarea>
+	</div>
+
+	<div>
+		<div class="mx-4 mt-3">
+			以下為加工後的資料(計時器：<span id="timer">0</span>)
+		</div>
+		<div id=renderResult></div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	//抓取元素
+	const getPlainTextBTN = document.querySelector("#getPlainTextBTN");
+	const getJsonNoImgBTN = document.querySelector("#getJsonNoImgBTN");
+	const getJsonWithImgBTN = document.querySelector("#getJsonWithImgBTN");
+	const dataHome = document.querySelector("#dataHome");
+	const renderResult = document.querySelector("#renderResult");
+
+	//點擊事件-取得純文字
+	getPlainTextBTN.addEventListener("click", function () {
+
+		fetch("/GetPlainText").then(function (result) {
+			return result.text()
+		}).then(function (text) {
+			dataHome.innerHTML = text;
+
+			let outputString = "";
+			outputString += "<div class='greeting m-4'>";
+			outputString += text;
+			outputString += "</div>";
+
+			renderResult.innerHTML = outputString;
+		})
+	})
+
+	//點擊事件-取得Json(不含圖片)
+	getJsonNoImgBTN.addEventListener("click", function () {
+		fetch("/GetJson").then(function (result) {
+			return result.json()
+		}).then(function (uList) {
+			dataHome.innerHTML = JSON.stringify(uList);
+			let outputString = "";
+			outputString += "<table class='table'>";
+			outputString += "<thead>";
+			outputString += "<tr><td>ID</td><td>姓名</td><td>年齡</td></tr>";
+			outputString += "</thead>";
+			outputString += "<tbody>";
+			for (let u of uList) {
+				outputString += "<tr>";
+				outputString += "<td>" + u.id + "</td>";
+				outputString += "<td>" + u.name + "</td>";
+				outputString += "<td>" + u.age + "</td>";
+				outputString += "</tr>";
+			}
+			outputString += "</tbody>";
+			outputString += "</table>";
+			renderResult.innerHTML = outputString;
+		})
+	})
+
+	//點擊事件-取得Json(含圖片)，此fetch寫法為箭頭函式簡寫
+	getJsonWithImgBTN.addEventListener("click", function () {
+		fetch("/GetJson?isWithBytes=true").then(result => result.json()).then(uList => {
+			dataHome.innerHTML = JSON.stringify(uList);
+			let outputString = "";
+			outputString += "<table class='table'>";
+			outputString += "<thead>";
+			outputString += "<tr><td>ID</td><td>姓名</td><td>年齡</td></tr>";
+			outputString += "</thead>";
+			outputString += "<tbody>";
+			for (let u of uList) {
+				outputString += "<tr>";
+				outputString += "<td>" + u.id + "</td>";
+				outputString += "<td>" + u.name + "</td>";
+				outputString += "<td>" + u.age + "</td>";
+				outputString += "<td>" + "<img src ='data:image/png;base64," + u.photo + "'>" + "</td>";
+				outputString += "</tr>";
+			}
+			outputString += "</tbody>";
+			outputString += "</table>";
+			renderResult.innerHTML = outputString;
+		})
+	})
+
+	//計時器
+	const timer = document.getElementById("timer");
+	setInterval(()=>{timer.innerHTML = +timer.innerHTML + 1;},1000);
+</script>
+
+</html>

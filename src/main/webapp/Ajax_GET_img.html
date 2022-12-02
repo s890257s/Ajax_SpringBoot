@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>使用Ajax取得圖片資料</title>
+<!-- bootstrap 5.1.3 CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+	crossorigin="anonymous">
+
+<style type="text/css">
+img {
+	width: 100%
+}
+</style>
+
+</head>
+
+<body>
+
+	<div class="container-fluid">
+		<div class="row justify-content-center">
+			<div class="col-5">
+				<div class="input-group my-3 ">
+					<input type="text" class="form-control" placeholder="輸入UserID "
+						id="inputID">
+					<div class="input-group-append">
+						<button class="btn btn-outline-secondary" type="button"
+							id="getImgBTN">取得圖片(Enter)</button>
+					</div>
+					<div class="m-2">(1~10，可輸入U01、u02、u3、4等等)</div>
+
+				</div>
+
+				<div>
+					<img src="https://fakeimg.pl/300?text=image" id="theImg">
+				</div>
+			</div>
+		</div>
+		<div class="row justify-content-center">
+			<div class="col-5">
+				 計時器：<span id="timer">0</span>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	const getImgBTN = document.getElementById("getImgBTN");
+	const inputID = document.getElementById("inputID");
+	const theImg = document.getElementById("theImg");
+	
+
+	getImgBTN.addEventListener("click", function() {
+
+		const formData = new FormData();
+		formData.append("userID", inputID.value)
+
+		fetch("/GetImg", {
+			method : "POST",
+			body : formData
+		}).then(function(result) {
+			return result.blob();
+		}).then(function(imgBlob) {
+			let tempURL = URL.createObjectURL(imgBlob);
+			theImg.src = tempURL;
+		})
+
+	})
+
+	inputID.addEventListener("keypress", function(e) {
+		a = e
+		if (e.key == 'Enter') {
+			getImgBTN.click();
+		}
+	})
+
+	//計時器
+	const timer = document.getElementById("timer");
+	setInterval(()=>{timer.innerHTML = +timer.innerHTML + 1;},1000);
+	
+</script>
+
+</html>
